@@ -47,7 +47,7 @@ The owner wants to learn by building and must be able to explain every part of t
 - **Time:** store all timestamps in UTC (`timestamptz`).
 - **Money:** order totals are integers in the smallest currency unit. Never use floats for money. Payments are simulated.
 - **Coordinates:** PostGIS and Redis GEO take **longitude first, then latitude**. Mixing the order is a classic bug.
-- **IDs:** format is an open decision (section 19). Do not assume.
+- **IDs:** use UUIDs for entity identifiers (ADR 0006). IDs do not replace authorization or tenant isolation.
 
 ---
 
@@ -87,7 +87,7 @@ Real payments, real routing and ETA, address geocoding, native mobile apps, seve
 
 ---
 
-## 6. Design decisions (provisional; changing one requires an ADR)
+## 6. Design decisions (D1, D8 and D9 accepted; others provisional; changing one requires an ADR)
 
 - **D1.** Multi-tenant platform with a shared courier pool, so orders from different restaurants compete for the same couriers.
 - **D2.** Parallel offers to N couriers (N=3, configurable). The first to accept wins.
@@ -237,7 +237,7 @@ REST under `/api/v1`, documented with OpenAPI from day one.
 - **Redis:** live courier positions, pub/sub for realtime across instances, rate limiting, queues.
 - **Queues:** for offer expiry, next rounds and notifications. The library is an open decision (BullMQ is the likely candidate).
 - **Realtime:** Server-Sent Events or WebSockets (open decision).
-- **Testing:** Jest for unit tests, integration tests against a real PostgreSQL, end-to-end tests, own concurrency tests, k6 for load.
+- **Testing:** Vitest for unit and end-to-end tests, integration tests against a real PostgreSQL, own concurrency tests, k6 for load.
 - **Operations:** Docker Compose, GitHub Actions (install, lint, type check, tests), structured logs with correlation ids, a metrics endpoint.
 - **Demo web:** Next.js with a map. Keep it small (around 15% of the effort). Do not polish it.
 
@@ -245,15 +245,18 @@ REST under `/api/v1`, documented with OpenAPI from day one.
 ```
 rumbo/
   rumbo-api/        NestJS API
+    compose.yaml    local API stack (API, PostGIS, Redis)
   rumbo-simulator/  courier and order simulator (not created yet)
   rumbo-web/        demo UI (not created yet)
   docs/
     adr/            architecture decision records
     learning-log.md
-  docker-compose.yml
+  compose.yaml      planned integration stack, added when multiple apps need to run together
   AGENTS.md
   README.md
 ```
+The existing `rumbo-api/compose.yaml` is the local development stack for the API and its dependencies. Add a root-level Compose file when the web or simulator must run with the API as one system. Do not run both stacks at the same time with the same published ports.
+
 Package manager and monorepo tooling are open decisions.
 
 ---
@@ -315,7 +318,6 @@ A separate tool that creates couriers moving around a fictional city (a rectangl
 
 ## 19. Open decisions (the owner decides; do not choose silently)
 
-- ID format (UUID, ULID or auto-increment).
 - How to store location history (time partitioning, separate table with retention, or sampling).
 - Nearby candidates: PostGIS or Redis GEO (to be measured before choosing).
 - Server-Sent Events or WebSockets, and how to scale to several instances.
