@@ -6,3 +6,10 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Tenant {
+  id String @id @default(uuid()) @db.Uuid
+  name String
+  createdAt DateTime @default(now()) @db.Timestamptz()
+  updatedAt DateTime @updatedAt @db.Timestamptz()
+}

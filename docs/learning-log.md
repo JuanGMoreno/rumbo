@@ -7,3 +7,5 @@
 - conocer tambien la existencia de gordon una ia especializada en docker una gran ayuda para proporcionar feedback
 -implementacion basica de nest js usando una arquitectura clasica modular lo que facilita su desarrollo en fases tempranas
 -desarrollo de las ADR que es la documentaciopn de las desciones que se van tomando dentro del proyecto en cuanto a desarrollo
+-Entendi lo basico de prisma entre eso la configuracion basica en la version 7 donde se define el esquema ,configuracion , servicios para conectar con nest js , etc
+-Tambien aprendi a crear modelos de prisma y hacer migraciones a patir de esos cambios nuevos logrando asi aplicarlas a la base de datos

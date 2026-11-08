@@ -47,7 +47,7 @@ The owner wants to learn by building and must be able to explain every part of t
 - **Time:** store all timestamps in UTC (`timestamptz`).
 - **Money:** order totals are integers in the smallest currency unit. Never use floats for money. Payments are simulated.
 - **Coordinates:** PostGIS and Redis GEO take **longitude first, then latitude**. Mixing the order is a classic bug.
-- **IDs:** format is an open decision (section 19). Do not assume.
+- **IDs:** use UUIDs for entity identifiers (ADR 0006). IDs do not replace authorization or tenant isolation.
 
 ---
 
@@ -318,7 +318,6 @@ A separate tool that creates couriers moving around a fictional city (a rectangl
 
 ## 19. Open decisions (the owner decides; do not choose silently)
 
-- ID format (UUID, ULID or auto-increment).
 - How to store location history (time partitioning, separate table with retention, or sampling).
 - Nearby candidates: PostGIS or Redis GEO (to be measured before choosing).
 - Server-Sent Events or WebSockets, and how to scale to several instances.
