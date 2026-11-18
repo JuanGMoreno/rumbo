@@ -1,0 +1,11 @@
+# Apuntes de estudio
+
+## Hito 0
+- Entendimeito y desarrollo en produndidad de docker ejercitando conceptos clave como imagenes, contenedores, redes, volumenes, por ejemplo los volumenes son de suma importancia ya que permiten mantener los datos que se ingresan en una instancia de base de datos lo que permite encender y apagar los contenedores sin perder los datos, por ejemplo el volumen usado apra mantener los datos de la base de datos postgis y redis
+- Desarrollo y implementación de dockerfiles multi paso aprendiendo las diferentes formas de construir imagenes mejorando asi su eficiencia y tamaño ,por ejemplo la implementacion de la imagen de rumbo-api la cual divide la contrucion de dependencias y demas de ya la imagen final en si logrando reducir su tamaño y chacheando de forma mas optima cada paso logrando una mayor velocidad
+- Desarrollo del docker compose enteniendo el montaje de varias imagenes y distribuyendo la información que cada una necesita para poder trabajar de forma correcta ,en adición a eso entender y construir mecanimos de control como el "depens_on" y el "healthcheck" garantizando disponibilidad por ejemplo se hacen revisiones como la de la conexion de redis la cual ejecuta su propio cli una revision de estado la cual devuelve "pong " cuando esta saludable, este tipo de comprobaciones tienen sus limitantes como que solo comprueba disponibilidad y no pueden garantizar otros factores como las reconexiones
+- conocer tambien la existencia de gordon una ia especializada en docker una gran ayuda para proporcionar feedback
+-implementacion basica de nest js usando una arquitectura clasica modular lo que facilita su desarrollo en fases tempranas
+-desarrollo de las ADR que es la documentaciopn de las desciones que se van tomando dentro del proyecto en cuanto a desarrollo
+-Entendi lo basico de prisma entre eso la configuracion basica en la version 7 donde se define el esquema ,configuracion , servicios para conectar con nest js , etc
+-Tambien aprendi a crear modelos de prisma y hacer migraciones a patir de esos cambios nuevos logrando asi aplicarlas a la base de datos

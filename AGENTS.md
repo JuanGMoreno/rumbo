@@ -44,10 +44,11 @@ The owner wants to learn by building and must be able to explain every part of t
 - **Glossary (Spanish → code):** negocio/restaurante = Tenant, repartidor = Courier, pedido = Order, despacho = Dispatch, ronda = Round, oferta = Offer, gerente = Business manager, cliente = Customer.
 - **Language:** TypeScript with strict mode. Run lint and type check before finishing any task.
 - **Git:** one branch per feature (the owner's usual Git Flow), small focused commits. Conventional Commit prefixes (`feat:`, `fix:`, `test:`, `docs:`, `chore:`) are recommended.
+- **Protected branches:** `develop` and `main` require pull requests and the GitHub Actions `build-and-test` check. Branches must be up to date before merging. Direct pushes, force pushes, and branch deletion are blocked; no bypass actors are configured.
 - **Time:** store all timestamps in UTC (`timestamptz`).
 - **Money:** order totals are integers in the smallest currency unit. Never use floats for money. Payments are simulated.
 - **Coordinates:** PostGIS and Redis GEO take **longitude first, then latitude**. Mixing the order is a classic bug.
-- **IDs:** format is an open decision (section 19). Do not assume.
+- **IDs:** use UUIDs for entity identifiers (ADR 0006). IDs do not replace authorization or tenant isolation.
 
 ---
 
@@ -87,7 +88,7 @@ Real payments, real routing and ETA, address geocoding, native mobile apps, seve
 
 ---
 
-## 6. Design decisions (provisional; changing one requires an ADR)
+## 6. Design decisions (D1, D8 and D9 accepted; others provisional; changing one requires an ADR)
 
 - **D1.** Multi-tenant platform with a shared courier pool, so orders from different restaurants compete for the same couriers.
 - **D2.** Parallel offers to N couriers (N=3, configurable). The first to accept wins.
@@ -237,7 +238,7 @@ REST under `/api/v1`, documented with OpenAPI from day one.
 - **Redis:** live courier positions, pub/sub for realtime across instances, rate limiting, queues.
 - **Queues:** for offer expiry, next rounds and notifications. The library is an open decision (BullMQ is the likely candidate).
 - **Realtime:** Server-Sent Events or WebSockets (open decision).
-- **Testing:** Jest for unit tests, integration tests against a real PostgreSQL, end-to-end tests, own concurrency tests, k6 for load.
+- **Testing:** Vitest for unit and end-to-end tests, integration tests against a real PostgreSQL, own concurrency tests, k6 for load.
 - **Operations:** Docker Compose, GitHub Actions (install, lint, type check, tests), structured logs with correlation ids, a metrics endpoint.
 - **Demo web:** Next.js with a map. Keep it small (around 15% of the effort). Do not polish it.
 
@@ -245,15 +246,18 @@ REST under `/api/v1`, documented with OpenAPI from day one.
 ```
 rumbo/
   rumbo-api/        NestJS API
+    compose.yaml    local API stack (API, PostGIS, Redis)
   rumbo-simulator/  courier and order simulator (not created yet)
   rumbo-web/        demo UI (not created yet)
   docs/
     adr/            architecture decision records
     learning-log.md
-  docker-compose.yml
+  compose.yaml      planned integration stack, added when multiple apps need to run together
   AGENTS.md
   README.md
 ```
+The existing `rumbo-api/compose.yaml` is the local development stack for the API and its dependencies. Add a root-level Compose file when the web or simulator must run with the API as one system. Do not run both stacks at the same time with the same published ports.
+
 Package manager and monorepo tooling are open decisions.
 
 ---
@@ -286,7 +290,16 @@ A separate tool that creates couriers moving around a fictional city (a rectangl
 - **Milestone 5 — Realtime and reliability.** Live tracking and dashboard, outbox with idempotent consumers, alert for a courier who does not pick up.
 - **Milestone 6 — Production and portfolio.** Logs, metrics, failure tests (kill processes mid-dispatch), AWS deploy, final docs, architecture diagram and case study.
 
-**Current status:** Milestone 0 (design and technical base). _Update this line as the project moves._
+**Current status:** Milestone 0 completed on 2026-11-18. Next: Milestone 1 (core); implementation has not started.
+
+Milestone 0 completion:
+- The API development Compose stack includes NestJS, PostgreSQL with PostGIS, Redis, and healthchecks; the owner verified startup.
+- Prisma 7 is integrated with NestJS. The first migration creates a minimal `Tenant` with UUID, name, and creation/update timestamps. Location and dispatch configuration remain pending for later migrations.
+- API CI installs dependencies, generates Prisma Client, checks lint and types, runs the existing unit test, and builds on Node.js 24. It passed in [run 44100560699](https://github.com/JuanGMoreno/rumbo/actions/runs/44100560699) and was merged through PR #3.
+- Branch rules enforce PRs and CI for `develop` and `main`.
+- ADRs 0001–0006 and the owner's learning log are present.
+
+CI currently validates unit tests and compilation; database integration, end-to-end, concurrency, and load tests remain future work. Closing milestone 0 does not mean the full `Tenant` feature or the domain invariants have been implemented.
 
 ---
 
@@ -315,7 +328,6 @@ A separate tool that creates couriers moving around a fictional city (a rectangl
 
 ## 19. Open decisions (the owner decides; do not choose silently)
 
-- ID format (UUID, ULID or auto-increment).
 - How to store location history (time partitioning, separate table with retention, or sampling).
 - Nearby candidates: PostGIS or Redis GEO (to be measured before choosing).
 - Server-Sent Events or WebSockets, and how to scale to several instances.
