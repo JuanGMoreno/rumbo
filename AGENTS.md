@@ -44,6 +44,7 @@ The owner wants to learn by building and must be able to explain every part of t
 - **Glossary (Spanish → code):** negocio/restaurante = Tenant, repartidor = Courier, pedido = Order, despacho = Dispatch, ronda = Round, oferta = Offer, gerente = Business manager, cliente = Customer.
 - **Language:** TypeScript with strict mode. Run lint and type check before finishing any task.
 - **Git:** one branch per feature (the owner's usual Git Flow), small focused commits. Conventional Commit prefixes (`feat:`, `fix:`, `test:`, `docs:`, `chore:`) are recommended.
+- **Protected branches:** `develop` and `main` require pull requests and the GitHub Actions `build-and-test` check. Branches must be up to date before merging. Direct pushes, force pushes, and branch deletion are blocked; no bypass actors are configured.
 - **Time:** store all timestamps in UTC (`timestamptz`).
 - **Money:** order totals are integers in the smallest currency unit. Never use floats for money. Payments are simulated.
 - **Coordinates:** PostGIS and Redis GEO take **longitude first, then latitude**. Mixing the order is a classic bug.
@@ -289,7 +290,16 @@ A separate tool that creates couriers moving around a fictional city (a rectangl
 - **Milestone 5 — Realtime and reliability.** Live tracking and dashboard, outbox with idempotent consumers, alert for a courier who does not pick up.
 - **Milestone 6 — Production and portfolio.** Logs, metrics, failure tests (kill processes mid-dispatch), AWS deploy, final docs, architecture diagram and case study.
 
-**Current status:** Milestone 0 (design and technical base). _Update this line as the project moves._
+**Current status:** Milestone 0 completed on 2026-11-18. Next: Milestone 1 (core); implementation has not started.
+
+Milestone 0 completion:
+- The API development Compose stack includes NestJS, PostgreSQL with PostGIS, Redis, and healthchecks; the owner verified startup.
+- Prisma 7 is integrated with NestJS. The first migration creates a minimal `Tenant` with UUID, name, and creation/update timestamps. Location and dispatch configuration remain pending for later migrations.
+- API CI installs dependencies, generates Prisma Client, checks lint and types, runs the existing unit test, and builds on Node.js 24. It passed in [run 44100560699](https://github.com/JuanGMoreno/rumbo/actions/runs/44100560699) and was merged through PR #3.
+- Branch rules enforce PRs and CI for `develop` and `main`.
+- ADRs 0001–0006 and the owner's learning log are present.
+
+CI currently validates unit tests and compilation; database integration, end-to-end, concurrency, and load tests remain future work. Closing milestone 0 does not mean the full `Tenant` feature or the domain invariants have been implemented.
 
 ---
 
